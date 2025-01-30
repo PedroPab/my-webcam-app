@@ -32,10 +32,14 @@ app.get('/capture', (req, res) => {
   const ffmpegProcess = spawn('ffmpeg', ['-f', 'video4linux2', '-i', '/dev/video0', '-vframes', '1', '-q:v', '2', imagePath]);
 
   ffmpegProcess.on('exit', async (code) => {
+    console.log(`[ ~ ffmpegProcess.on ~ code]`, code)
+
     if (code === 0) {
       try {
         const image = await Jimp.read(imagePath);
-        await image.resize(Jimp.AUTO, 240).quality(80).writeAsync(imagePath);
+        console.log(`[ ~ ffmpegProcess.on ~ image]`, image)
+        await image.resize(320, Jimp.AUTO).quality(80).writeAsync(imagePath);
+
         console.log(`Imagen guardada: ${imagePath}`);
 
         // Enviar la imagen al cliente

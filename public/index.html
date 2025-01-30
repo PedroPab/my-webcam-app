@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Captura de Cámara</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      margin: 10px;
+    }
+
+    #gallery {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .photo-container {
+      position: relative;
+      margin: 10px;
+    }
+
+    .photo-container img {
+      max-width: 200px;
+      border: 2px solid #333;
+      border-radius: 5px;
+    }
+
+    .download-btn {
+      display: block;
+      text-decoration: none;
+      background: #007BFF;
+      color: white;
+      padding: 5px;
+      border-radius: 5px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>📸 Captura de Cámara</h1>
+  <button onclick="capturePhoto()">Tomar Foto</button>
+  <div id="gallery"></div>
+
+  <script>
+    async function capturePhoto() {
+      try {
+        const response = await fetch('/capture');
+        const data = await response.json();
+
+        if (data.success) {
+          const imageUrl = data.imageUrl;
+          addPhotoToGallery(imageUrl);
+        } else {
+          alert('Error al capturar la imagen.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al comunicarse con el servidor.');
+      }
+    }
+
+    async function loadPhotos() {
+      try {
+        const response = await fetch('/images');
+        const html = await response.text();
+
+        // Extraer imágenes del HTML generado por el backend
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const links = doc.querySelectorAll('a');
+
+        links.forEach(link => {
+          addPhotoToGallery(link.getAttribute('href'));
+        });
+      } catch (error) {
+        console.error('Error al cargar imágenes:', error);
+      }
+    }
+
+    function addPhotoToGallery(imageUrl) {
+      const gallery = document.getElementById('gallery');
+      const container = document.createElement('div');
+      container.className = 'photo-container';
+
+      const img = document.createElement('img');
+      img.src = imageUrl;
+
+      const downloadLink = document.createElement('a');
+      downloadLink.href = imageUrl;
+      downloadLink.download = imageUrl.split('/').pop();
+      downloadLink.className = 'download-btn';
+      downloadLink.innerText = 'Descargar';
+
+      container.appendChild(img);
+      container.appendChild(downloadLink);
+      gallery.prepend(container);
+    }
+
+    // Cargar imágenes al cargar la página
+    window.onload = loadPhotos;
+  </script>
+
+</body>
+
+</html>
