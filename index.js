@@ -36,11 +36,6 @@ app.get('/capture', (req, res) => {
 
     if (code === 0) {
       try {
-        const image = await Jimp.read(imagePath);
-        console.log(`[ ~ ffmpegProcess.on ~ image]`, image)
-        await image.resize(320, Jimp.AUTO).quality(80).writeAsync(imagePath);
-
-        console.log(`Imagen guardada: ${imagePath}`);
 
         // Enviar la imagen al cliente
         res.json({ success: true, imageUrl: `/images/photo_${timestamp}.jpg` });
