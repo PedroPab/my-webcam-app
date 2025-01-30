@@ -62,6 +62,23 @@ app.get('/images', (req, res) => {
   });
 });
 
+// Obtener las últimas 9 imágenes
+app.get('/latest-images', (req, res) => {
+  fs.readdir(imagesDir, (err, files) => {
+    if (err) return res.status(500).json({ error: 'Error al leer las imágenes' });
+
+    // Ordenar por fecha y obtener las últimas 9 imágenes
+    const latestFiles = files
+      .filter(file => file.endsWith('.jpg'))
+      .sort((a, b) => b.split('_')[1].split('.')[0] - a.split('_')[1].split('.')[0])
+      .slice(0, 9)
+      .map(file => ({ filename: file, url: `/images/${file}` }));
+
+    res.json(latestFiles);
+  });
+});
+
+
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });
