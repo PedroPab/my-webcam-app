@@ -62,17 +62,20 @@ app.get('/images', (req, res) => {
   });
 });
 
-// Obtener las últimas 9 imágenes
 app.get('/latest-images', (req, res) => {
   fs.readdir(imagesDir, (err, files) => {
     if (err) return res.status(500).json({ error: 'Error al leer las imágenes' });
 
-    // Ordenar por fecha y obtener las últimas 9 imágenes
+    // Filtrar solo archivos con el formato correcto
     const latestFiles = files
-      .filter(file => file.endsWith('.jpg'))
-      .sort((a, b) => b.split('_')[1].split('.')[0] - a.split('_')[1].split('.')[0])
-      .slice(0, 9)
-      .map(file => ({ filename: file, url: `/images/${file}` }));
+      .filter(file => /^photo_\d+\.jpg$/.test(file)) // Solo archivos tipo "photo_123456789.jpg"
+      .map(file => ({
+        filename: file,
+        timestamp: parseInt(file.split('_')[1].split('.')[0]), // Extraer timestamp
+        url: `/images/${file}`
+      }))
+      .sort((a, b) => b.timestamp - a.timestamp) // Ordenar por fecha (más recientes primero)
+      .slice(0, 9); // Limitar a 9 imágenes
 
     res.json(latestFiles);
   });
